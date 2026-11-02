@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { AuthProvider } from '@/lib/auth';
 import { useThemeColors } from '@/lib/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -22,6 +23,7 @@ export default function RootLayout() {
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <ThemeProvider
         value={{
           ...base,
@@ -30,8 +32,18 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerTintColor: c.text, headerStyle: { backgroundColor: c.surface } }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="ogloszenie/[id]" options={{ title: 'Ogłoszenie' }} />
+          <Stack.Screen name="konto/logowanie" options={{ title: 'Logowanie' }} />
+          <Stack.Screen name="konto/rejestracja" options={{ title: 'Rejestracja' }} />
+          <Stack.Screen name="konto/weryfikacja" options={{ title: 'Potwierdzenie e-maila' }} />
+          <Stack.Screen name="konto/reset-hasla" options={{ title: 'Reset hasła' }} />
+          <Stack.Screen name="konto/zmiana-hasla" options={{ title: 'Zmiana hasła' }} />
+          <Stack.Screen name="konto/dane-konta" options={{ title: 'Dane konta' }} />
+          <Stack.Screen name="konto/usun-konto" options={{ title: 'Usuń konto' }} />
+          <Stack.Screen name="konto/prywatnosc" options={{ title: 'Polityka prywatności' }} />
+          <Stack.Screen name="konto/regulamin" options={{ title: 'Regulamin' }} />
         </Stack>
       </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

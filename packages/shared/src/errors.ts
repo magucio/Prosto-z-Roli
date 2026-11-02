@@ -32,3 +32,33 @@ export function errorMessage(error: unknown): string {
   const key = raw.split(':')[0]?.trim() ?? '';
   return MESSAGES[key] ?? 'Coś poszło nie tak. Spróbuj ponownie.';
 }
+
+// Błędy Supabase Auth (pole `code` w AuthApiError).
+const AUTH_MESSAGES: Record<string, string> = {
+  invalid_credentials: 'Nieprawidłowy e-mail lub hasło.',
+  email_not_confirmed: 'Potwierdź adres e-mail kodem z wiadomości.',
+  user_already_exists: 'Konto z tym adresem już istnieje. Zaloguj się.',
+  email_exists: 'Konto z tym adresem już istnieje. Zaloguj się.',
+  otp_expired: 'Kod wygasł lub jest nieprawidłowy. Wyślij nowy kod.',
+  over_email_send_rate_limit: 'Wysłaliśmy już wiadomość. Odczekaj chwilę przed kolejną próbą.',
+  over_request_rate_limit: 'Zbyt wiele prób. Spróbuj ponownie za kilka minut.',
+  weak_password: 'Hasło jest zbyt słabe. Użyj co najmniej 8 znaków, litery i cyfry.',
+  same_password: 'Nowe hasło musi się różnić od obecnego.',
+  email_address_not_authorized: 'Nie możemy teraz wysłać wiadomości na ten adres. Spróbuj później.',
+  email_address_invalid: 'Podaj poprawny adres e-mail.',
+  signup_disabled: 'Rejestracja jest chwilowo wyłączona.',
+  user_banned: 'To konto jest zablokowane.',
+  reauthentication_needed: 'Zaloguj się ponownie, aby zmienić hasło.',
+  invalid_password: 'Nieprawidłowe hasło.',
+};
+
+export function authErrorMessage(error: unknown): string {
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error ? String((error as { code: unknown }).code) : '';
+  if (code && AUTH_MESSAGES[code]) return AUTH_MESSAGES[code];
+  const raw = typeof error === 'object' && error !== null && 'message' in error ? String((error as { message: unknown }).message) : '';
+  if (/invalid login credentials/i.test(raw)) return AUTH_MESSAGES.invalid_credentials!;
+  if (/email not confirmed/i.test(raw)) return AUTH_MESSAGES.email_not_confirmed!;
+  if (AUTH_MESSAGES[raw]) return AUTH_MESSAGES[raw]!;
+  return errorMessage(error);
+}

@@ -35,3 +35,30 @@ describe('contactSettingsSchema', () => {
     expect(r.success).toBe(false);
   });
 });
+
+import { accountDataSchema, isValidNip, registerSchema } from './schemas';
+import { authErrorMessage } from './errors';
+
+describe('konta', () => {
+  it('sprawdza sumę kontrolną NIP', () => {
+    expect(isValidNip('5260250274')).toBe(true);
+    expect(isValidNip('5260250275')).toBe(false);
+  });
+  it('rejestracja wymaga zgody i zgodnych haseł', () => {
+    const base = { displayName: 'Jan', email: 'Jan@Example.pl', password: 'jablka123', passwordRepeat: 'jablka123', sellerType: 'farm' };
+    expect(registerSchema.safeParse({ ...base, acceptTerms: true }).success).toBe(true);
+    expect(registerSchema.safeParse({ ...base, acceptTerms: false }).success).toBe(false);
+    expect(registerSchema.safeParse({ ...base, passwordRepeat: 'inne1234', acceptTerms: true }).success).toBe(false);
+    expect(registerSchema.safeParse({ ...base, password: 'krotkie', passwordRepeat: 'krotkie', acceptTerms: true }).success).toBe(false);
+  });
+  it('firma wymaga NIP i nazwy', () => {
+    const r = accountDataSchema.safeParse({
+      displayName: 'Firma', sellerType: 'company', farmName: '', companyName: '', nip: '', regon: '', addressLine: '', postalCode: '', city: '',
+    });
+    expect(r.success).toBe(false);
+  });
+  it('tłumaczy błędy logowania', () => {
+    expect(authErrorMessage({ code: 'invalid_credentials', message: 'x' })).toBe('Nieprawidłowy e-mail lub hasło.');
+    expect(authErrorMessage({ message: 'Invalid login credentials' })).toBe('Nieprawidłowy e-mail lub hasło.');
+  });
+});

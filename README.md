@@ -12,7 +12,8 @@ Architektura, decyzje i ryzyka: dokument „Prosto z Roli — architektura syste
 | 2. Repozytorium i Supabase | gotowe — monorepo pnpm, Expo SDK 58, panel Next.js, CI i build APK w GitHub Actions |
 | 3. Schemat bazy i RLS | gotowe — 4 migracje, słowniki, 38/38 testów bezpieczeństwa (`supabase/tests/security_smoke.sql`) |
 | 5. Mapa i pinezki | częściowo — mapa MapLibre z danymi z `map_points`, klastry, lokalizacja, karta ogłoszenia |
-| 4, 6–12 | nie rozpoczęte |
+| 4. Konta użytkowników | gotowe — rejestracja z kodem e-mail, logowanie, reset i zmiana hasła, dane konta/firmy, wylogowanie, usuwanie konta (Edge Function `account-delete`); test `tests/e2e-api/accounts.mjs` 15/15 |
+| 6–12 | nie rozpoczęte |
 
 ## Struktura
 
