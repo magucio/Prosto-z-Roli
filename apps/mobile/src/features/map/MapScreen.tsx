@@ -6,7 +6,7 @@ import {
   type CameraRef,
   type ViewStateChangeEvent,
 } from '@maplibre/maplibre-react-native';
-import { errorMessage, POLAND_CENTER, POLAND_ZOOM } from '@pzr/shared';
+import { errorMessage, POLAND_BOUNDS, POLAND_ZOOM } from '@pzr/shared';
 import { palette, radius, spacing } from '@pzr/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Location from 'expo-location';
@@ -100,7 +100,13 @@ export function MapScreen() {
         logo={false}
         compassHiddenFacingNorth
         onRegionDidChange={onRegionDidChange}>
-        <Camera ref={cameraRef} initialViewState={{ center: POLAND_CENTER, zoom: POLAND_ZOOM }} />
+        <Camera
+          ref={cameraRef}
+          // Start: cała Polska niezależnie od rozmiaru ekranu; środek mapy nie wyjedzie daleko poza kraj.
+          initialViewState={{ bounds: [POLAND_BOUNDS.west, POLAND_BOUNDS.south, POLAND_BOUNDS.east, POLAND_BOUNDS.north] }}
+          minZoom={4}
+          maxBounds={[12.5, 48.0, 25.7, 55.6]}
+        />
         <GeoJSONSource
           id="listings"
           data={geojson}
