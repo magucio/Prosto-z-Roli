@@ -1,0 +1,12 @@
+{
+  "name": "prosto-z-roli",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "mobile": "pnpm --filter mobile start"
+  },
+  "engines": { "node": ">=22" }
+}

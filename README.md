@@ -9,22 +9,36 @@ Architektura, decyzje i ryzyka: dokument „Prosto z Roli — architektura syste
 | Etap | Status |
 | --- | --- |
 | 1. Architektura i UI/UX | gotowe (dokument) |
-| 2. Repozytorium i Supabase | w toku — projekt Supabase gotowy, szkielet aplikacji czeka na dostęp do npm |
+| 2. Repozytorium i Supabase | gotowe — monorepo pnpm, Expo SDK 58, panel Next.js, CI i build APK w GitHub Actions |
 | 3. Schemat bazy i RLS | gotowe — 4 migracje, słowniki, 38/38 testów bezpieczeństwa (`supabase/tests/security_smoke.sql`) |
-| 4–12 | nie rozpoczęte |
+| 5. Mapa i pinezki | częściowo — mapa MapLibre z danymi z `map_points`, klastry, lokalizacja, karta ogłoszenia |
+| 4, 6–12 | nie rozpoczęte |
 
 ## Struktura
 
 ```
-apps/mobile          aplikacja Expo (Android, iOS później)        — do utworzenia
-apps/admin           panel Next.js (VPS za Caddy)                 — do utworzenia
-packages/shared      typy bazy, schematy Zod, stałe               — do utworzenia
-packages/ui          design tokens i komponenty                   — do utworzenia
-packages/config      wspólne tsconfig / eslint                    — do utworzenia
+apps/mobile          aplikacja Expo SDK 58 (Android, iOS później)
+apps/admin           panel Next.js (VPS za Caddy) — szkielet
+packages/shared      typy bazy, schematy Zod, limity, komunikaty błędów
+packages/ui          design tokens (kolory jasne/ciemne, odstępy, typografia)
+packages/config      wspólny tsconfig
 supabase/migrations  migracje SQL (źródło prawdy dla bazy)
 supabase/seed        słowniki: kategorie, jednostki, katalog
 supabase/tests       testy RLS, limitów i wygasania
 docs                 dokumentacja techniczna
+```
+
+## Jak zbudować APK
+
+GitHub → zakładka **Actions** → **Android APK** → **Run workflow** (buduje się też sam po każdej zmianie w `apps/mobile` lub `packages`).
+Po ok. 20–30 minutach plik APK jest w sekcji **Artifacts** uruchomienia. APK testowy jest podpisany kluczem debug.
+
+## Lokalnie
+
+```
+pnpm install
+pnpm typecheck && pnpm test
+pnpm mobile          # serwer Expo (wymaga development builda — MapLibre nie działa w Expo Go)
 ```
 
 ## Supabase

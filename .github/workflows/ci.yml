@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Testy jednostkowe
+        run: pnpm test
+      - name: Expo doctor
+        working-directory: apps/mobile
+        run: npx --yes expo-doctor
+      - name: Paczka JS Androida
+        working-directory: apps/mobile
+        run: npx expo export --platform android --output-dir /tmp/export
+      - name: Build panelu admina
+        working-directory: apps/admin
+        run: pnpm build

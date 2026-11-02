@@ -1,0 +1,52 @@
+name: Android APK
+
+# Buduje samodzielny plik APK (z wbudowanym JS) bez EAS i bez Android Studio.
+# APK do testów jest podpisany kluczem debug — do Google Play potrzebny będzie klucz produkcyjny (sekrety).
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/android-apk.yml'
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g" -Dorg.gradle.daemon=false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Prebuild (generowanie projektu Androida)
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --clean --no-install
+      - name: Gradle assembleRelease
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+      - name: Nazwa pliku
+        id: name
+        run: echo "file=prosto-z-roli-$(date +%Y%m%d)-${GITHUB_SHA::7}.apk" >> "$GITHUB_OUTPUT"
+      - run: cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk "${{ steps.name.outputs.file }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.file }}
+          path: ${{ steps.name.outputs.file }}
+          retention-days: 30
