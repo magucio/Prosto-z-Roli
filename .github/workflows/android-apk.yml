@@ -40,7 +40,7 @@ jobs:
         run: npx expo prebuild --platform android --clean --no-install
       - name: Gradle assembleRelease
         working-directory: apps/mobile/android
-        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64
       - name: Nazwa pliku
         id: name
         run: echo "file=prosto-z-roli-$(date +%Y%m%d)-${GITHUB_SHA::7}.apk" >> "$GITHUB_OUTPUT"
