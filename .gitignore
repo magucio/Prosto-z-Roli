@@ -6,8 +6,8 @@ build/
 .next/
 .expo/
 expo-env.d.ts
-android/
-ios/
+apps/mobile/android/
+apps/mobile/ios/
 *.apk
 *.aab
 *.ipa
