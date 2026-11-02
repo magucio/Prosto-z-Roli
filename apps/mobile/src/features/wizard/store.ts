@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LIMITS } from '@pzr/shared';
-import { create } from 'zustand';
+import { createContext, useContext } from 'react';
+import { createStore, useStore, type StoreApi } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type DraftItem = {
@@ -21,9 +22,8 @@ export type DraftImage = {
   width: number;
   height: number;
   bytes: number;
-  // ścieżka w Storage po udanym wysłaniu (ponowna próba publikacji nie wysyła drugi raz)
+  // ścieżka w Storage po udanym wysłaniu (ponowna próba zapisu nie wysyła drugi raz)
   storagePath?: string;
-  registered?: boolean;
 };
 
 export type Draft = {
@@ -46,6 +46,8 @@ export type Draft = {
   shareEmail: boolean;
   allowChat: boolean;
   locationAck: boolean;
+  // edycja: zdjęcia zapisane na serwerze przed edycją (do usunięcia, jeśli użytkownik je skasuje)
+  originalImagePaths: string[];
 };
 
 const EMPTY: Draft = {
@@ -68,36 +70,54 @@ const EMPTY: Draft = {
   shareEmail: false,
   allowChat: true,
   locationAck: false,
+  originalImagePaths: [],
 };
 
-type Store = Draft & {
+export type DraftStore = Draft & {
   set: (patch: Partial<Draft>) => void;
   upsertItem: (item: DraftItem) => void;
   removeItem: (key: string) => void;
   reset: () => void;
 };
 
-export const useDraft = create<Store>()(
-  persist(
-    (set) => ({
-      ...EMPTY,
-      set: (patch) => set(patch),
-      upsertItem: (item) =>
-        set((s) => {
-          const exists = s.items.some((i) => i.key === item.key);
-          if (!exists && s.items.length >= LIMITS.itemsPerListing) return s;
-          return { items: exists ? s.items.map((i) => (i.key === item.key ? item : i)) : [...s.items, item] };
-        }),
-      removeItem: (key) => set((s) => ({ items: s.items.filter((i) => i.key !== key) })),
-      reset: () => set({ ...EMPTY }),
+type SetFn = StoreApi<DraftStore>['setState'];
+const actions = (set: SetFn) => ({
+  set: (patch: Partial<Draft>) => set(patch),
+  upsertItem: (item: DraftItem) =>
+    set((s) => {
+      const exists = s.items.some((i) => i.key === item.key);
+      if (!exists && s.items.length >= LIMITS.itemsPerListing) return s;
+      return { items: exists ? s.items.map((i) => (i.key === item.key ? item : i)) : [...s.items, item] };
     }),
-    {
-      name: 'pzr-listing-draft-v1',
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ set: _s, upsertItem: _u, removeItem: _r, reset: _x, ...draft }) => draft,
-    },
-  ),
+  removeItem: (key: string) => set((s) => ({ items: s.items.filter((i) => i.key !== key) })),
+  reset: () => set({ ...EMPTY }),
+});
+
+// Nowe ogłoszenie: szkic przetrwa zamknięcie aplikacji.
+export const createDraftStore = createStore<DraftStore>()(
+  persist((set) => ({ ...EMPTY, ...actions(set) }), {
+    name: 'pzr-listing-draft-v1',
+    storage: createJSONStorage(() => AsyncStorage),
+    partialize: ({ set: _s, upsertItem: _u, removeItem: _r, reset: _x, ...draft }) => draft,
+  }),
 );
+
+// Edycja istniejącego ogłoszenia: tylko w pamięci, ładowana z serwera przy każdym wejściu.
+export const editDraftStore = createStore<DraftStore>()((set) => ({ ...EMPTY, ...actions(set) }));
+
+export const WizardContext = createContext<StoreApi<DraftStore>>(createDraftStore);
+
+export function useDraftApi(): StoreApi<DraftStore> {
+  return useContext(WizardContext);
+}
+
+export function useDraft(): DraftStore {
+  return useStore(useContext(WizardContext));
+}
+
+export function isEditStore(api: StoreApi<DraftStore>): boolean {
+  return api === editDraftStore;
+}
 
 export const STEPS = ['Lokalizacja', 'Dane', 'Pozycje', 'Zdjęcia', 'Kontakt', 'Podsumowanie'] as const;
 

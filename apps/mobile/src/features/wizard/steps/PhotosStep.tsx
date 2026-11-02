@@ -10,13 +10,14 @@ import { AppText, Button } from '@/components/ui';
 import { useThemeColors } from '@/lib/theme';
 
 import { processImage } from '../images';
-import { useDraft } from '../store';
+import { useDraft, useDraftApi } from '../store';
 
 const key = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function PhotosStep() {
   const c = useThemeColors();
   const { images, set } = useDraft();
+  const api = useDraftApi();
   const [busy, setBusy] = useState(false);
   const left = LIMITS.imagesPerListing - images.length;
 
@@ -48,7 +49,7 @@ export function PhotosStep() {
         const p = await processImage(asset.uri);
         added.push({ key: key(), uri: p.uri, width: p.width, height: p.height, bytes: p.bytes });
       }
-      set({ images: [...useDraft.getState().images, ...added].slice(0, LIMITS.imagesPerListing) });
+      set({ images: [...api.getState().images, ...added].slice(0, LIMITS.imagesPerListing) });
     } catch {
       Alert.alert('Nie udało się dodać zdjęcia', 'Spróbuj wybrać inne zdjęcie.');
     } finally {
@@ -64,7 +65,7 @@ export function PhotosStep() {
     const img = images.find((i) => i.key === k);
     if (!img) return;
     // kolejność decyduje o zdjęciu głównym; zarejestrowane już zdjęcia trzeba zarejestrować na nowo
-    set({ images: [img, ...images.filter((i) => i.key !== k)].map((i) => ({ ...i, registered: false })) });
+    set({ images: [img, ...images.filter((i) => i.key !== k)] });
   }
 
   return (

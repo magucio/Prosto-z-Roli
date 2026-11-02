@@ -8,12 +8,21 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from
 import { FormError, FormScreen, Segmented } from '@/components/form';
 import { AppText, Button, Card } from '@/components/ui';
 import { useCatalogSearch, useUnits, type CatalogEntry } from '@/features/wizard/dictionaries';
-import { parseDecimal, useDraft, type DraftItem } from '@/features/wizard/store';
+import { createDraftStore, editDraftStore, parseDecimal, useDraft, WizardContext, type DraftItem } from '@/features/wizard/store';
 import { useThemeColors } from '@/lib/theme';
 
 const newKey = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-export default function ItemEditor() {
+export default function ItemEditorRoute() {
+  const { store } = useLocalSearchParams<{ store?: string }>();
+  return (
+    <WizardContext.Provider value={store === 'edit' ? editDraftStore : createDraftStore}>
+      <ItemEditor />
+    </WizardContext.Provider>
+  );
+}
+
+function ItemEditor() {
   const c = useThemeColors();
   const { key } = useLocalSearchParams<{ key?: string }>();
   const { kind, items, upsertItem } = useDraft();

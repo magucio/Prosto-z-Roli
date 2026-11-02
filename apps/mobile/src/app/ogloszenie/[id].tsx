@@ -1,10 +1,11 @@
 import { errorMessage, STORAGE_BUCKET_LISTING_IMAGES } from '@pzr/shared';
 import { radius, spacing } from '@pzr/ui';
 import { Image } from 'expo-image';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AppText, Card, Chip, EmptyState } from '@/components/ui';
+import { AppText, Button, Card, Chip, EmptyState } from '@/components/ui';
+import { STATUS_LABEL } from '@/features/my/useMyListings';
 import { useListing } from '@/features/listing/useListing';
 import { env } from '@/lib/env';
 import { formatPrice, useThemeColors } from '@/lib/theme';
@@ -53,6 +54,27 @@ export default function ListingScreen() {
           {new Date(data.updated_at).toLocaleDateString('pl-PL')}
         </AppText>
       </View>
+
+      {data.is_owner ? (
+        <Card>
+          <AppText variant="label">
+            To Twoje ogłoszenie · {STATUS_LABEL[data.status as keyof typeof STATUS_LABEL] ?? data.status}
+          </AppText>
+          {data.expires_at ? (
+            <AppText variant="caption" muted>
+              Ważne do {new Date(data.expires_at).toLocaleDateString('pl-PL')}
+            </AppText>
+          ) : null}
+          <View style={styles.ownerActions}>
+            <Button
+              title="Edytuj"
+              onPress={() => router.push({ pathname: '/moje/edytuj/[id]', params: { id: data.id } })}
+              style={styles.flex}
+            />
+            <Button title="Moje ogłoszenia" variant="secondary" onPress={() => router.push('/moje')} style={styles.flex} />
+          </View>
+        </Card>
+      ) : null}
 
       <Card>
         <AppText variant="heading">{data.kind === 'service' ? 'Usługi' : 'Produkty'}</AppText>
@@ -108,4 +130,6 @@ const styles = StyleSheet.create({
   },
   rowText: { flex: 1, gap: 2 },
   note: { textAlign: 'center' },
+  ownerActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  flex: { flex: 1 },
 });

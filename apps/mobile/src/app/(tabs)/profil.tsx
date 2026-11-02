@@ -58,6 +58,7 @@ export default function ProfileTab() {
 
       {session ? (
         <View style={[styles.list, { borderColor: c.border }]}>
+          <ListRow icon="storefront" label="Moje ogłoszenia" onPress={() => router.push('/moje')} />
           <ListRow icon="badge" label="Dane konta" onPress={() => router.push('/konto/dane-konta')} />
           <ListRow icon="lock" label="Zmień hasło" onPress={() => router.push('/konto/zmiana-hasla')} />
         </View>
@@ -85,7 +86,7 @@ export default function ProfileTab() {
       ) : null}
 
       <AppText variant="caption" muted style={styles.footer}>
-        Moje ogłoszenia, ulubione i powiadomienia pojawią się w kolejnych etapach.
+        Ulubione, wiadomości i powiadomienia pojawią się w kolejnych etapach.
       </AppText>
     </ScrollView>
   );

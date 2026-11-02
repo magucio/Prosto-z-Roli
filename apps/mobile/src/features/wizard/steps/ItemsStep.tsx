@@ -7,12 +7,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText, Button, Card } from '@/components/ui';
 import { formatPrice, useThemeColors } from '@/lib/theme';
 
-import { parseDecimal, useDraft } from '../store';
+import { isEditStore, parseDecimal, useDraft, useDraftApi } from '../store';
 
 export function ItemsStep() {
   const c = useThemeColors();
   const { items, kind, removeItem } = useDraft();
   const full = items.length >= LIMITS.itemsPerListing;
+  const store = isEditStore(useDraftApi()) ? 'edit' : 'create';
   return (
     <View style={styles.wrap}>
       <AppText muted>
@@ -31,7 +32,7 @@ export function ItemsStep() {
           <Pressable
             accessibilityLabel={`Edytuj ${it.productName}`}
             hitSlop={10}
-            onPress={() => router.push({ pathname: '/kreator/pozycja', params: { key: it.key } })}>
+            onPress={() => router.push({ pathname: '/kreator/pozycja', params: { key: it.key, store } })}>
             <MaterialIcons name="edit" size={22} color={c.textMuted} />
           </Pressable>
           <Pressable accessibilityLabel={`Usuń ${it.productName}`} hitSlop={10} onPress={() => removeItem(it.key)}>
@@ -43,7 +44,7 @@ export function ItemsStep() {
         title={full ? `Osiągnięto limit ${LIMITS.itemsPerListing} pozycji` : 'Dodaj pozycję'}
         variant="secondary"
         disabled={full}
-        onPress={() => router.push('/kreator/pozycja')}
+        onPress={() => router.push({ pathname: '/kreator/pozycja', params: { store } })}
       />
     </View>
   );
