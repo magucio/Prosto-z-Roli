@@ -647,6 +647,8 @@ export type Database = {
       }
       register_push_token: { Args: { p_platform: string; p_token: string }; Returns: undefined }
       remove_listing: { Args: { p_id: string }; Returns: undefined }
+      replace_listing_images: { Args: { p_images: Json; p_listing_id: string }; Returns: number }
+      replace_listing_items: { Args: { p_items: Json; p_listing_id: string }; Returns: number }
       report_content: {
         Args: { p_details?: string; p_reason: string; p_target_id: string; p_target_type: string }
         Returns: string

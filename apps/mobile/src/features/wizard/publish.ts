@@ -54,22 +54,19 @@ export async function saveDraft(api: StoreApi<DraftStore>, publish: boolean): Pr
   }
   const listingId = id as string;
 
-  // 2. Pozycje: zastąpienie całej listy
+  // 2. Pozycje: atomowa podmiana całej listy (jedna transakcja w bazie)
   {
-    const { error: delError } = await supabase.from('listing_products').delete().eq('listing_id', listingId);
-    check(delError);
-    const { error } = await supabase.from('listing_products').insert(
-      d.items.map((it, index) => ({
-        listing_id: listingId,
+    const { error } = await supabase.rpc('replace_listing_items', {
+      p_listing_id: listingId,
+      p_items: d.items.map((it) => ({
         product_id: it.productId,
         unit_id: it.unitId,
         price_type: it.priceType,
         price: it.priceType === 'fixed' ? parseDecimal(it.price) : null,
         quantity: parseDecimal(it.quantity),
         description: it.description.trim() || null,
-        sort: index,
       })),
-    );
+    });
     check(error);
   }
 
@@ -88,25 +85,16 @@ export async function saveDraft(api: StoreApi<DraftStore>, publish: boolean): Pr
     api.getState().set({ images });
   }
   {
-    const { error: delError } = await supabase.from('listing_images').delete().eq('listing_id', listingId);
-    check(delError);
-    if (images.length > 0) {
-      const { error } = await supabase.from('listing_images').insert(
-        images.map((img, i) => ({
-          listing_id: listingId,
-          storage_path: img.storagePath as string,
-          is_main: i === 0,
-          sort: i,
-          width: img.width || null,
-          height: img.height || null,
-        })),
-      );
-      check(error);
-    }
+    const { error } = await supabase.rpc('replace_listing_images', {
+      p_listing_id: listingId,
+      p_images: images.map((img) => ({ path: img.storagePath as string, width: img.width, height: img.height })),
+    });
+    check(error);
     // pliki usunięte przez użytkownika w edycji
     const kept = new Set(images.map((i) => i.storagePath));
     const removed = api.getState().originalImagePaths.filter((p) => !kept.has(p));
     if (removed.length > 0) {
+      // błąd sprzątania nie cofa zapisu ogłoszenia (do zrobienia w etapie 11: okresowe usuwanie sierocych plików)
       await supabase.storage.from(STORAGE_BUCKET_LISTING_IMAGES).remove(removed);
     }
     api.getState().set({ originalImagePaths: images.map((i) => i.storagePath as string) });

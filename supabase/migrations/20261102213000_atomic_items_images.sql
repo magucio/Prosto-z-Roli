@@ -1,4 +1,4 @@
--- Prosto z Roli — migracja 8 (CZEKA NA ZASTOSOWANIE): atomowa podmiana pozycji/zdjęć + odczyt własnych plików w Storage.
+-- Prosto z Roli — migracja 8: atomowa podmiana pozycji/zdjęć + odczyt własnych plików w Storage.
 -- Storage: usuwanie pliku wymaga też prawa odczytu (SELECT) — właściciel ogłoszenia widzi swoje pliki.
 create policy listing_images_owner_select on storage.objects for select to authenticated
   using (

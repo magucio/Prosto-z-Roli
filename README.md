@@ -14,7 +14,8 @@ Architektura, decyzje i ryzyka: dokument „Prosto z Roli — architektura syste
 | 5. Mapa i pinezki | częściowo — mapa MapLibre z danymi z `map_points`, klastry, lokalizacja, karta ogłoszenia |
 | 4. Konta użytkowników | gotowe — rejestracja z kodem e-mail, logowanie, reset i zmiana hasła, dane konta/firmy, wylogowanie, usuwanie konta (Edge Function `account-delete`); test `tests/e2e-api/accounts.mjs` 15/15 |
 | 6. Kreator ogłoszeń | gotowe — 6 kroków (lokalizacja, dane, pozycje z katalogu, zdjęcia bez EXIF, kontakt, publikacja), szkic zapisywany w telefonie; test `tests/e2e-api/publish.mjs` 22/22 |
-| 7–12 | nie rozpoczęte |
+| 7. Panel sprzedawcy | gotowe — Moje ogłoszenia: statystyki, statusy, terminy, edycja (atomowa), wstrzymaj/wznów, „Nadal aktualne”, usuń; test `tests/e2e-api/my-listings.mjs` 26/26 |
+| 8–12 | nie rozpoczęte |
 
 ## Struktura
 

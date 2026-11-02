@@ -50,15 +50,25 @@ try {
   {
     const { error } = await me.from('listings').update({ title: 'Gruszki i jabłka e2e' }).eq('id', id);
     check('edycja tytułu aktywnego', !error, error?.message);
-    await me.from('listing_products').delete().eq('listing_id', id);
-    const { error: e2 } = await me.from('listing_products').insert([
-      { listing_id: id, product_id: prods[0].id, unit_id: kg, price: 5.5, sort: 0 },
-      { listing_id: id, product_id: prods[1].id, unit_id: kg, price_type: 'negotiable', price: null, sort: 1 },
-    ]);
-    check('zastąpienie pozycji', !e2, e2?.message);
-    await me.from('listing_images').delete().eq('listing_id', id);
-    const { error: e3 } = await me.from('listing_images').insert({ listing_id: id, storage_path: paths[1], is_main: true, sort: 0 });
-    check('zmiana zdjęcia głównego', !e3, e3?.message);
+    const { error: e2 } = await me.rpc('replace_listing_items', {
+      p_listing_id: id,
+      p_items: [
+        { product_id: prods[0].id, unit_id: kg, price_type: 'fixed', price: 5.5 },
+        { product_id: prods[1].id, unit_id: kg, price_type: 'negotiable', price: null },
+      ],
+    });
+    check('atomowa podmiana pozycji', !e2, e2?.message);
+    const { error: eBad } = await me.rpc('replace_listing_items', {
+      p_listing_id: id,
+      p_items: [
+        { product_id: prods[2].id, unit_id: kg, price_type: 'fixed', price: 1 },
+        { product_id: prods[0].id, unit_id: kg, price_type: 'fixed', price: null },
+      ],
+    });
+    const { data: afterBad } = await anon.rpc('listing_detail', { p_id: id });
+    check('nieudana podmiana nie zostawia ogłoszenia bez pozycji', !!eBad && afterBad?.items?.length === 2, `${eBad?.code} → ${afterBad?.items?.length} poz.`);
+    const { error: e3 } = await me.rpc('replace_listing_images', { p_listing_id: id, p_images: [{ path: paths[1], width: 64, height: 48 }] });
+    check('zmiana listy zdjęć (atomowo)', !e3, e3?.message);
     const { error: e4 } = await me.storage.from('listing-images').remove([paths[0]]);
     check('usunięcie zdjęcia ze Storage', !e4, e4?.message);
     const gone = await fetch(`${URL}/storage/v1/object/public/listing-images/${paths[0]}`);
@@ -76,6 +86,8 @@ try {
   {
     const { data } = await other.from('listing_products').delete().eq('listing_id', id).select('id');
     check('obcy nie usunie cudzych pozycji', (data ?? []).length === 0);
+    const { error: eOther } = await other.rpc('replace_listing_images', { p_listing_id: id, p_images: [] });
+    check('obcy nie podmieni cudzych zdjęć', !!eOther, eOther?.message);
     const { error } = await other.storage.from('listing-images').remove([paths[1]]);
     const still = await fetch(`${URL}/storage/v1/object/public/listing-images/${paths[1]}`);
     check('obcy nie usunie cudzego zdjęcia', still.ok, error?.message ?? String(still.status));
