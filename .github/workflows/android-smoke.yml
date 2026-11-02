@@ -57,6 +57,8 @@ jobs:
             python3 tests/android/tap_text.py "Profil" && sleep 4 && adb exec-out screencap -p > profil.png || true
             python3 tests/android/tap_text.py "Zaloguj się" && sleep 4 && adb exec-out screencap -p > logowanie.png || true
             adb shell input keyevent KEYCODE_BACK && sleep 2
+            python3 tests/android/tap_text.py "Dodaj" && sleep 3 && adb exec-out screencap -p > dodaj.png || true
+            python3 tests/android/tap_text.py "Profil" && sleep 2 || true
             python3 tests/android/tap_text.py "Załóż konto" && sleep 4 && adb exec-out screencap -p > rejestracja.png || true
             adb logcat -d > logcat.txt || true
             adb shell pidof pl.prostozroli.app > pid.txt || echo "BRAK PROCESU" > pid.txt

@@ -378,6 +378,7 @@ export type Database = {
         }
         Insert: {
           address_text?: string | null
+          place_name?: string | null
           description?: string
           listing_kind?: Database["public"]["Enums"]["listing_kind"]
           location_exact: unknown
@@ -388,6 +389,7 @@ export type Database = {
         }
         Update: {
           address_text?: string | null
+          place_name?: string | null
           description?: string
           location_exact?: unknown
           main_category_id?: string

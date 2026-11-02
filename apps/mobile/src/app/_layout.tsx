@@ -41,6 +41,7 @@ export default function RootLayout() {
           <Stack.Screen name="konto/usun-konto" options={{ title: 'Usuń konto' }} />
           <Stack.Screen name="konto/prywatnosc" options={{ title: 'Polityka prywatności' }} />
           <Stack.Screen name="konto/regulamin" options={{ title: 'Regulamin' }} />
+          <Stack.Screen name="kreator/pozycja" options={{ title: 'Pozycja ogłoszenia', presentation: 'modal' }} />
         </Stack>
       </ThemeProvider>
       </AuthProvider>

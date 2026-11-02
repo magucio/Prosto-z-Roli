@@ -42,6 +42,14 @@ const config: ExpoConfig = {
     ],
     '@maplibre/maplibre-react-native',
     [
+      'expo-image-picker',
+      {
+        photosPermission: 'Prosto z Roli potrzebuje dostępu do zdjęć, aby dodać je do Twojego ogłoszenia.',
+        cameraPermission: 'Prosto z Roli potrzebuje aparatu, aby zrobić zdjęcie do Twojego ogłoszenia.',
+        microphonePermission: false,
+      },
+    ],
+    [
       'expo-location',
       {
         locationWhenInUsePermission:
