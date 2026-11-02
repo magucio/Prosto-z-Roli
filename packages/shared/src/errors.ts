@@ -50,6 +50,7 @@ const AUTH_MESSAGES: Record<string, string> = {
   user_banned: 'To konto jest zablokowane.',
   reauthentication_needed: 'Zaloguj się ponownie, aby zmienić hasło.',
   invalid_password: 'Nieprawidłowe hasło.',
+  unexpected_failure: 'Nie udało się wysłać e-maila z kodem. Spróbuj ponownie za kilka minut.',
 };
 
 export function authErrorMessage(error: unknown): string {
