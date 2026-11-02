@@ -27,6 +27,7 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - uses: actions/checkout@v4
       - name: Pobierz APK
         env:
           GH_TOKEN: ${{ github.token }}
@@ -53,6 +54,10 @@ jobs:
             adb shell monkey -p pl.prostozroli.app -c android.intent.category.LAUNCHER 1
             sleep 25
             adb exec-out screencap -p > screen.png || true
+            python3 tests/android/tap_text.py "Profil" && sleep 4 && adb exec-out screencap -p > profil.png || true
+            python3 tests/android/tap_text.py "Zaloguj się" && sleep 4 && adb exec-out screencap -p > logowanie.png || true
+            adb shell input keyevent KEYCODE_BACK && sleep 2
+            python3 tests/android/tap_text.py "Załóż konto" && sleep 4 && adb exec-out screencap -p > rejestracja.png || true
             adb logcat -d > logcat.txt || true
             adb shell pidof pl.prostozroli.app > pid.txt || echo "BRAK PROCESU" > pid.txt
       - name: Wynik
@@ -68,4 +73,4 @@ jobs:
           name: smoke-${{ github.run_id }}
           path: |
             logcat.txt
-            screen.png
+            *.png
